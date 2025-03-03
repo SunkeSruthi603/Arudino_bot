@@ -1,0 +1,89 @@
+#define TRIG_PIN 7
+#define ECHO_PIN 8
+#define IR_PIN 4
+#define MOTOR_LEFT 5
+#define MOTOR_RIGHT 6
+#define SERVO_PIN 3
+
+#include <Servo.h>
+
+Servo myServo;
+
+void setup() {
+  Serial.begin(9600);
+  
+  //Ultrasonic Sensor
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+
+  //IR Sensor
+  pinMode(IR_PIN, INPUT);
+  
+  //Motors
+  pinMode(MOTOR_LEFT, OUTPUT);
+  pinMode(MOTOR_RIGHT, OUTPUT);
+  
+  //Servo
+  myServo.attach(SERVO_PIN);
+  myServo.write(90); 
+  // Start at center
+}
+
+void loop() {
+  //distance using Ultrasonic Sensor
+  long duration;
+  float distance;
+  
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  duration = pulseIn(ECHO_PIN, HIGH);
+  distance = duration * 0.034 / 2; // Convert to cm
+  
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Read IR Sensor
+  int irValue = digitalRead(IR_PIN);
+  Serial.print("IR Sensor: ");
+  Serial.println(irValue ? "No Obstacle" : "Obstacle Detected");
+
+  //Motor Control Logic
+  if (distance < 10) {  
+    digitalWrite(MOTOR_LEFT, LOW);
+    digitalWrite(MOTOR_RIGHT, LOW);
+    Serial.println("Stopping: Too close!");
+  } 
+  else if (distance < 50) {  
+    analogWrite(MOTOR_LEFT, 100);
+    analogWrite(MOTOR_RIGHT, 100);
+    Serial.println("Moving Slowly...");
+  } 
+  else {  
+    analogWrite(MOTOR_LEFT, 200);
+    analogWrite(MOTOR_RIGHT, 200);
+    Serial.println("Moving Faster...");
+  }
+
+  // Obstacle Avoidance Logic
+  if (irValue == 0) 
+  {  
+    digitalWrite(MOTOR_LEFT, LOW);
+    digitalWrite(MOTOR_RIGHT, LOW);
+    Serial.println("Obstacle Detected! Stopping...");
+    delay(1000);
+    
+    // Scan left & right using Servo
+    myServo.write(45);
+    delay(500);
+    myServo.write(135);
+    delay(500);
+    myServo.write(90);
+  }
+
+  delay(200);
+}

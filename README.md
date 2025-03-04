@@ -22,7 +22,7 @@ This is an IoT-based **human-following robot** built using **Arduino Uno**. The 
 
 
 ## Circuit Diagram  
-![Circuit Diagram](assets/circuit_diagram.png)
+![Circuit Diagram](assets/circuit.png)
 
 
 
